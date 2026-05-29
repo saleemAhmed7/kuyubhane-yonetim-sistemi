@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block page_title %}Borrowing System{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">Circulation</p>
+        <h2>Borrowing history</h2>
+    </div>
+    <span>{{ borrowings|length }} visible records</span>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header flex-wrap gap-3">
+        <form class="search-bar wide" method="get">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input name="q" value="{{ search }}" placeholder="Search student or book">
+            <select name="status">
+                <option value="">All status</option>
+                <option value="Borrowed" {% if selected_status == "Borrowed" %}selected{% endif %}>Borrowed</option>
+                <option value="Returned" {% if selected_status == "Returned" %}selected{% endif %}>Returned</option>
+            </select>
+            <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+        </form>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#borrowModal">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i> Borrow Book
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Student</th><th>Book</th><th>Borrowed</th><th>Due Date</th><th>Status</th><th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in borrowings %}
+                <tr class="{% if row.status == 'Borrowed' and row.return_date < today %}overdue-row{% endif %}">
+                    <td>#{{ row.borrow_id }}</td>
+                    <td>{{ row.student_name }}<br><small>{{ row.email }}</small></td>
+                    <td>{{ row.book_title }}<br><small>{{ row.author }}</small></td>
+                    <td>{{ row.borrow_date }}</td>
+                    <td>{{ row.return_date }}</td>
+                    <td><span class="status-badge {{ row.status|lower }}">{{ row.status }}</span></td>
+                    <td class="text-end">
+                        {% if row.status == "Borrowed" %}
+                        <form method="post" action="{{ url_for('return_book', borrow_id=row.borrow_id) }}" data-confirm="Return this book?">
+                            <button class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Return</button>
+                        </form>
+                        {% else %}
+                        <span class="text-secondary">Closed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-secondary">No borrowing history found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="borrowModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form class="modal-content glass-modal" method="post" action="{{ url_for('add_borrowing') }}">
+            <div class="modal-header"><h5 class="modal-title">Borrow Book</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Student</label>
+                    <select class="form-select" name="student_id" required>
+                        {% for student in students %}
+                        <option value="{{ student.student_id }}">{{ student.first_name }} {{ student.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Book</label>
+                    <select class="form-select" name="book_id" required>
+                        {% for book in books %}
+                        <option value="{{ book.book_id }}">{{ book.title }} ({{ book.available_copies }} available)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Borrow Date</label>
+                    <input class="form-control" type="date" name="borrow_date" value="{{ today }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Return Date</label>
+                    <input class="form-control" type="date" name="return_date" required>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-primary">Confirm Borrow</button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

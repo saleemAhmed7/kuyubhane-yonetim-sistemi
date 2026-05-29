@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="{{ current_lang }}" dir="{{ page_dir }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or t("app_title") }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body data-user-role="{{ session.role if session.role else 'Guest' }}">
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="{{ url_for('catalog') if session.role == 'Student' else url_for('dashboard') }}">
+                <span class="brand-icon"><i class="fa-solid fa-book-open-reader"></i></span>
+                <span>
+                    <strong>{{ t("app_title") }}</strong>
+                    <small>{{ t("student_portal") if session.role == "Student" else t("library_management") }}</small>
+                </span>
+            </a>
+            <nav class="nav flex-column gap-2">
+                {% if session.role == "Student" %}
+                <a class="nav-link {% if request.endpoint == 'catalog' %}active{% endif %}" href="{{ url_for('catalog') }}">
+                    <i class="fa-solid fa-book-open"></i><span>{{ t("book_catalog") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'categories_page' or request.endpoint == 'category_detail' %}active{% endif %}" href="{{ url_for('categories_page') }}">
+                    <i class="fa-solid fa-folder-open"></i><span>{{ t("book_categories") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'my_borrowings' %}active{% endif %}" href="{{ url_for('my_borrowings') }}">
+                    <i class="fa-solid fa-clock-rotate-left"></i><span>{{ t("my_borrowings") }}</span>
+                </a>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i><span>{{ t("logout") }}</span>
+                </a>
+                {% else %}
+                <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                    <i class="fa-solid fa-chart-pie"></i><span>{{ t("dashboard") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint in ['students'] %}active{% endif %}" href="{{ url_for('students') }}">
+                    <i class="fa-solid fa-user-graduate"></i><span>{{ t("students") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint in ['books'] %}active{% endif %}" href="{{ url_for('books') }}">
+                    <i class="fa-solid fa-book"></i><span>{{ t("books") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint in ['borrowing'] %}active{% endif %}" href="{{ url_for('borrowing') }}">
+                    <i class="fa-solid fa-right-left"></i><span>{{ t("borrowing") }}</span>
+                </a>
+                <a class="nav-link {% if request.endpoint in ['fines'] %}active{% endif %}" href="{{ url_for('fines') }}">
+                    <i class="fa-solid fa-receipt"></i><span>{{ t("fines") }}</span>
+                </a>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i><span>{{ t("logout") }}</span>
+                </a>
+                {% endif %}
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <nav class="topbar">
+                <button class="icon-btn d-lg-none" id="sidebarToggle" type="button" aria-label="Open navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <p class="eyebrow mb-1">{{ t("library_management") }}</p>
+                    <h1 class="page-title mb-0">{% block page_title %}{{ t("dashboard") }}{% endblock %}</h1>
+                </div>
+                <div class="topbar-actions">
+                    <div class="dropdown">
+                        <button class="icon-btn lang-btn" data-bs-toggle="dropdown" type="button" aria-label="Language">
+                            <i class="fa-solid fa-language"></i>
+                            <span>{{ current_lang|upper }}</span>
+                        </button>
+                        <button id="site-theme-toggle" class="icon-btn" type="button" aria-label="Toggle theme" title="Toggle theme">
+                            <i id="site-theme-icon" class="fa-solid fa-moon"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-menu glass-card">
+                            {% for code, lang in languages.items() %}
+                            <a class="dropdown-item lang-item {% if current_lang == code %}active{% endif %}" href="{{ url_for('set_language', lang=code) }}">
+                                {{ lang.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="icon-btn position-relative" data-bs-toggle="dropdown" type="button" aria-label="Notifications">
+                            <i class="fa-regular fa-bell"></i>
+                            {% if notifications|length %}
+                            <span class="pulse-dot"></span>
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-menu glass-card">
+                            <h6 class="dropdown-header">{{ t("due_soon") }}</h6>
+                            {% for note in notifications %}
+                            <div class="dropdown-item-text notification-item">
+                                <strong>{{ note.title }}</strong>
+                                <span>{{ note.first_name }} {{ note.last_name }} - {{ note.return_date }}</span>
+                            </div>
+                            {% else %}
+                            <div class="dropdown-item-text notification-item">{{ t("no_notifications") }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="dropdown account-dropdown">
+                        <button class="admin-pill account-trigger" data-bs-toggle="dropdown" type="button" title="{{ t('account') }}" aria-label="{{ t('account') }}">
+                            {% if current_user and current_user.avatar %}
+                            <img class="avatar-mini" src="{{ url_for('static', filename=current_user.avatar) }}" alt="{{ t('profile_photo') }}">
+                            {% else %}
+                            <i class="fa-solid fa-user-shield"></i>
+                            {% endif %}
+                            <span>{{ session.admin_username or t("admin") }}</span>
+                            <small class="account-hover-label">{{ t("account") }}</small>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-menu glass-card">
+                            <h6 class="dropdown-header">{{ t("account") }}</h6>
+                            <a class="dropdown-item lang-item" href="{{ url_for('account') }}">
+                                <i class="fa-solid fa-user-pen me-2"></i>{{ t("edit_account") }}
+                            </a>
+                            <a class="dropdown-item lang-item" href="{{ url_for('logout') }}">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>{{ t("logout") }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <section class="content-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <div class="toast-stack">
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show glass-alert" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% include 'partials/book_bot.html' %}
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <!-- Client-side i18n removed; server renders Turkish-only -->
+        <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/edu_bot_replace.js') }}"></script>
+        <!-- Global modal used by various UI flows -->
+        <div id="global-modal" class="global-modal" style="display:none;">
+            <div class="global-modal-backdrop"></div>
+            <div class="global-modal-card glass-card">
+                <div class="global-modal-header"><h5 id="global-modal-title"></h5></div>
+                <div class="global-modal-body"><div id="global-modal-body"></div><div id="global-modal-input-wrap" style="margin-top:8px;"><input id="global-modal-input" class="form-control" /></div></div>
+                <div class="global-modal-footer" style="margin-top:12px;text-align:right;">
+                    <button id="global-modal-cancel" class="btn btn-secondary">İptal</button>
+                    <button id="global-modal-confirm" class="btn btn-primary">Onayla</button>
+                </div>
+            </div>
+        </div>
+    {% block scripts %}{% endblock %}
+    {% if config.DEBUG %}
+    <script>document.write('\x3Cscript src="http://' + (location.hostname || '127.0.0.1') + ':35729/livereload.js?snipver=1">\x3C/script>')</script>
+    {% endif %}
+</body>
+</html>

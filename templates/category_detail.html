@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ category }}{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">{{ t('book_categories') }}</p>
+        <h2>{{ category }}</h2>
+    </div>
+    <span>{{ books|length }} {{ t('books_available') }}</span>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header d-flex gap-3 align-items-center">
+        <div class="search-bar wide" style="flex:1">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="category-search" placeholder="Search by title or serial" value="{{ search }}">
+            <button id="category-clear" class="btn btn-secondary btn-sm" type="button">Clear</button>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-2">
+        {% for book in books %}
+        <div class="col">
+            <div class="card book-card h-100" data-title="{{ book.title|e }}" data-author="{{ book.author|e }}" data-category="{{ book.category|e }}" data-serial="{{ book.serial_number }}">
+                <div class="card-body d-flex gap-3">
+                    <img class="book-thumb" src="" data-title="{{ book.title|e }}" data-author="{{ book.author|e }}" alt="cover" style="width:84px;height:120px;object-fit:cover;border-radius:6px;">
+                    <div style="flex:1">
+                        <div class="small text-muted">Serial: <strong>#{{ book.serial_number }}</strong></div>
+                        <h5 class="card-title mb-1">{{ book.title }}</h5>
+                        <div class="text-secondary small">{{ book.author }}</div>
+                        <div class="text-muted small">Shelf: {{ book.shelf_location }} • Order: {{ book.order_position }}</div>
+                        <div class="mt-2 d-flex align-items-center justify-content-between">
+                            <div><span class="copy-pill">{{ book.available_copies }}</span> {{ t('available') }}</div>
+                            <form method="post" action="{{ url_for('borrow_from_catalog', book_id=book.book_id) }}" data-confirm="{{ t('borrow_confirm') }}">
+                                <button class="btn btn-sm btn-success"><i class="fa-solid fa-book-medical"></i> {{ t('borrow') }}</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// small client-side search within this category
+document.addEventListener('DOMContentLoaded', ()=>{
+    const input = document.getElementById('category-search');
+    const clear = document.getElementById('category-clear');
+    function filter(){
+        const q=(input.value||'').toLowerCase();
+        document.querySelectorAll('.book-card').forEach(card=>{
+            const title=card.dataset.title.toLowerCase();
+            const serial = (card.dataset.serial||'').toString();
+            const show = !q || title.includes(q) || serial.includes(q);
+            card.closest('.col').style.display = show ? '' : 'none';
+        });
+    }
+    input?.addEventListener('input', filter);
+    clear?.addEventListener('click', ()=>{ input.value=''; filter(); });
+});
+</script>
+
+{% endblock %}

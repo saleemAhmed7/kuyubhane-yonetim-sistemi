@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ t("book_catalog") }}{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">{{ t("student_portal_label") }}</p>
+        <h2>{{ t("available_books") }}</h2>
+    </div>
+    <span>{{ categories|length }} {{ t("book_categories") }}</span>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header flex-wrap gap-3 align-items-center">
+        <div class="search-bar wide" style="flex:1">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="catalog-search" placeholder="{{ t('search_title_author_category') }}" value="{{ search }}">
+            <button id="catalog-clear" class="btn btn-secondary btn-sm" type="button">Clear</button>
+        </div>
+        <div class="ms-3 category-nav" id="category-nav" style="overflow:auto;white-space:nowrap;">
+            <button class="btn btn-sm btn-ghost category-btn active" data-cat="__all">All</button>
+            {% for cat, books in categories %}
+            <button class="btn btn-sm btn-ghost category-btn" data-cat="{{ cat|e }}">{{ cat }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="catalog-sections">
+        {% for cat, books in categories %}
+        <section class="catalog-section" id="cat-{{ loop.index }}" data-category="{{ cat|e }}">
+            <h3 class="section-title">{{ cat }}</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                {% for book in books %}
+                <div class="col">
+                    <div class="card book-card h-100" data-title="{{ book.title|e }}" data-author="{{ book.author|e }}" data-category="{{ book.category|e }}" data-book-id="{{ book.book_id }}">
+                        <div class="card-body d-flex gap-3">
+                            <img class="book-thumb" src="" data-title="{{ book.title|e }}" data-author="{{ book.author|e }}" alt="cover" style="width:84px;height:120px;object-fit:cover;border-radius:6px;">
+                            <div style="flex:1">
+                                <div class="small text-muted">Serial: <strong>#{{ book.serial_number }}</strong></div>
+                                <h5 class="card-title mb-1">{{ book.title }}</h5>
+                                <div class="text-secondary small">{{ book.author }}</div>
+                                <div class="text-muted small">{{ book.category }}</div>
+                                <div class="mt-2 d-flex align-items-center justify-content-between">
+                                    <div><span class="copy-pill">{{ book.available_copies }}</span> {{ t('available') }}</div>
+                                    <form method="post" action="{{ url_for('borrow_from_catalog', book_id=book.book_id) }}" data-confirm="{{ t('borrow_confirm') }}">
+                                        <button class="btn btn-sm btn-success"><i class="fa-solid fa-book-medical"></i> {{ t('borrow') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

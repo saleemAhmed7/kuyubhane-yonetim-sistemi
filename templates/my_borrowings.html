@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ t("my_borrowings") }}{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">{{ t("student_portal_label") }}</p>
+        <h2>{{ t("my_borrowed_books") }}</h2>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('catalog') }}"><i class="fa-solid fa-book-open"></i> {{ t("catalog") }}</a>
+</div>
+
+<div class="glass-card panel mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">{{ t("borrowing") }}</p>
+            <h2>{{ t("history") }}</h2>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>{{ t("book") }}</th><th>{{ t("borrow_date") }}</th><th>{{ t("return_date") }}</th><th>{{ t("status") }}</th><th>{{ t("action") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in borrowings %}
+                <tr class="{% if row.status == 'Borrowed' and row.return_date < today %}overdue-row{% endif %}">
+                    <td>#{{ row.borrow_id }}</td>
+                    <td>{{ row.book_title }}<br><small>{{ row.author }}</small></td>
+                    <td>{{ row.borrow_date }}</td>
+                    <td>{{ row.return_date }}</td>
+                    <td><span class="status-badge {{ row.status|lower }}">{{ row.status }}</span></td>
+                    <td>
+                        {% if row.status|lower != 'returned' %}
+                        <button class="btn btn-sm btn-success return-borrow-btn" data-borrow-id="{{ row.borrow_id }}" data-book-title="{{ row.book_title }}" data-serial-number="{{ row.serial_number or '' }}" data-i18n="button_return_book">{{ t('button_return_book') }}</button>
+                        {% else %}
+                        <span class="text-secondary">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-secondary">{{ t("no_my_borrowings") }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">{{ t("fines") }}</p>
+            <h2>{{ t("my_fines") }}</h2>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>{{ t("book") }}</th><th>{{ t("amount") }}</th><th>{{ t("date") }}</th><th>{{ t("status") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fine in fines %}
+                <tr>
+                    <td>#{{ fine.fine_id }}</td>
+                    <td>{{ fine.book_title }}</td>
+                    <td>{{ "%.2f"|format(fine.fine_amount) }}</td>
+                    <td>{{ fine.fine_date }}</td>
+                    <td><span class="status-badge {{ fine.status|lower }}">{{ fine.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-secondary">{{ t("no_my_fines") }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.return-borrow-btn').forEach(btn=>{
+        btn.addEventListener('click', async function(){
+            const id = this.dataset.borrowId;
+            const title = (window.__i18n && window.__i18n.t)? window.__i18n.t('button_return_book') : 'Return Book';
+            const conf = await window.showGlobalModal({ title: title, body: (window.__i18n && window.__i18n.t)? window.__i18n.t('enter_identifier') : 'Confirm', showInput:false, confirmText: (window.__i18n && window.__i18n.t)? window.__i18n.t('button_confirm') : 'Confirm', cancelText: (window.__i18n && window.__i18n.t)? window.__i18n.t('button_cancel') : 'Cancel' });
+            if (!conf.confirmed) return;
+            try{
+                const res = await fetch('/api/return-borrowing', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ borrow_id: parseInt(id) }) });
+                const data = await res.json();
+                if (res.ok && data.ok){
+                    const row = this.closest('tr');
+                    if (row){
+                        const badge = row.querySelector('.status-badge');
+                        if (badge) { badge.textContent = (window.__i18n && window.__i18n.t)? window.__i18n.t('returned') : 'Returned'; badge.classList.remove('borrowed'); badge.classList.add('returned'); }
+                        this.remove();
+                    }
+                    window.showGlobalModal({ title: (window.__i18n && window.__i18n.t)? window.__i18n.t('button_return_book') : 'Return', body: data.message || '', showInput:false, confirmText: (window.__i18n && window.__i18n.t)? window.__i18n.t('button_close') : 'Close' });
+                } else if (data && data.error){
+                    window.showGlobalModal({ title: (window.__i18n && window.__i18n.t)? window.__i18n.t('network_error') : 'Error', body: data.message || data.error, showInput:false, confirmText:(window.__i18n && window.__i18n.t)? window.__i18n.t('button_close') : 'Close' });
+                } else {
+                    window.showGlobalModal({ title: (window.__i18n && window.__i18n.t)? window.__i18n.t('unexpected_response') : 'Unexpected', body:'', showInput:false, confirmText:(window.__i18n && window.__i18n.t)? window.__i18n.t('button_close') : 'Close' });
+                }
+            }catch(e){ window.showGlobalModal({ title:(window.__i18n && window.__i18n.t)? window.__i18n.t('network_error') : 'Network error', body:'', showInput:false, confirmText:(window.__i18n && window.__i18n.t)? window.__i18n.t('button_close') : 'Close' }); }
+        });
+    });
+});
+</script>
+{% endblock %}

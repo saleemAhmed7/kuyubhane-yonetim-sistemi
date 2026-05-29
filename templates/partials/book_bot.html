@@ -1,0 +1,39 @@
+<div id="edu-bot-root" class="edu-bot-root">
+    <button id="edu-bot-fab" class="edu-bot-fab" aria-label="Open EduBot">
+        <span class="fab-icon"><i class="fa-solid fa-robot"></i></span>
+        <span class="online-dot" aria-hidden="true"></span>
+    </button>
+
+    <div id="edu-bot-panel" class="edu-bot-panel" aria-hidden="true" role="dialog" aria-label="EduBot chat window">
+        <div class="edu-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="edu-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="edu-meta">
+                    <div class="edu-title">EduBot AI <span class="edu-online">ONLINE</span></div>
+                    <div class="edu-sub">Ask me about books, dataset, or exams</div>
+                </div>
+            </div>
+            <div class="edu-header-actions">
+                <button id="edu-clear" class="edu-clear btn btn-sm" aria-label="Clear messages" title="Clear messages">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button id="edu-bot-close" class="edu-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <div id="edu-bot-body" class="edu-body">
+            <div id="edu-messages" class="edu-messages" role="log" aria-live="polite"></div>
+
+            <div class="edu-quick-actions">
+                <button class="edu-quick" data-q="Material Help">Material Help</button>
+                <button class="edu-quick" data-q="Dataset Help">Dataset Help</button>
+                <button class="edu-quick" data-q="Exam Help">Exam Help</button>
+            </div>
+
+            <div class="edu-input-row">
+                <textarea id="edu-input" class="edu-input" rows="1" placeholder="Type a message... (Enter to send)"></textarea>
+                <button id="edu-send" class="edu-send" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</div>

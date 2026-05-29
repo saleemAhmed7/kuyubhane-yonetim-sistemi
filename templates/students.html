@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block page_title %}Students Management{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">Students</p>
+        <h2>Student records</h2>
+    </div>
+    <span>{{ students|length }} visible records</span>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header flex-wrap gap-3">
+        <form class="search-bar" method="get">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input name="q" value="{{ search }}" placeholder="Search students">
+            <button class="btn btn-primary btn-sm" type="submit">Search</button>
+        </form>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+            <i class="fa-solid fa-plus"></i> Add Student
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Enrollment</th><th>Status</th><th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>#{{ student.student_id }}</td>
+                    <td>{{ student.first_name }} {{ student.last_name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.phone or "-" }}</td>
+                    <td>{{ student.enrollment_date }}</td>
+                    <td><span class="status-badge {{ student.status|lower }}">{{ student.status }}</span></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#editStudent{{ student.student_id }}"><i class="fa-solid fa-pen"></i></button>
+                        <form class="d-inline" method="post" action="{{ url_for('delete_student', student_id=student.student_id) }}" data-confirm="Delete this student?">
+                            <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-secondary">No students found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form class="modal-content glass-modal" method="post" action="{{ url_for('add_student') }}">
+            <div class="modal-header"><h5 class="modal-title">Add Student</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body row g-3">
+                {% include "partials/student_form.html" %}
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-primary">Save Student</button></div>
+        </form>
+    </div>
+</div>
+
+{% for student in students %}
+<div class="modal fade" id="editStudent{{ student.student_id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form class="modal-content glass-modal" method="post" action="{{ url_for('edit_student', student_id=student.student_id) }}">
+            <div class="modal-header"><h5 class="modal-title">Edit Student</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body row g-3">
+                {% set item = student %}
+                {% include "partials/student_form.html" %}
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-primary">Update Student</button></div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

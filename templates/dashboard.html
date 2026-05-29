@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ t("dashboard") }}{% endblock %}
+
+{% block content %}
+<div class="hero-panel glass-card">
+    <div>
+        <p class="eyebrow">{{ t("today_overview") }}</p>
+        <h2>{{ t("dashboard_intro_title") }}</h2>
+        <p>{{ t("dashboard_intro_text") }}</p>
+    </div>
+    <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ url_for('borrowing') }}"><i class="fa-solid fa-right-left"></i> {{ t("new_borrow") }}</a>
+        <a class="btn btn-outline-light" href="{{ url_for('books') }}"><i class="fa-solid fa-book"></i> {{ t("books") }}</a>
+    </div>
+</div>
+
+<div class="row g-4 stats-grid">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-cyan"><i class="fa-solid fa-book-bookmark"></i></div>
+            <span>{{ t("total_books") }}</span>
+            <strong>{{ stats.copies }}</strong>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-green"><i class="fa-solid fa-user-graduate"></i></div>
+            <span>{{ t("total_students") }}</span>
+            <strong>{{ stats.students }}</strong>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-purple"><i class="fa-solid fa-layer-group"></i></div>
+            <span>{{ t("active_borrowings") }}</span>
+            <strong>{{ stats.borrowed }}</strong>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-orange"><i class="fa-solid fa-receipt"></i></div>
+            <span>{{ t("unpaid_fines") }}</span>
+            <strong>{{ stats.unpaid_fines }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12 col-xl-7">
+        <div class="glass-card panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ t("inventory") }}</p>
+                    <h2>{{ t("book_categories") }}</h2>
+                </div>
+                <span class="badge text-bg-dark">{{ stats.available }} {{ t("available") }}</span>
+            </div>
+            {% if category_data %}
+            <canvas id="categoryChart" height="140"
+                data-labels='{{ category_data | map(attribute="category") | list | tojson }}'
+                data-values='{{ category_data | map(attribute="copies") | list | tojson }}'></canvas>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-book-open"></i>
+                <span>{{ t("no_book_categories") }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-12 col-xl-5">
+        <div class="glass-card panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ t("health") }}</p>
+                    <h2>{{ t("system_snapshot") }}</h2>
+                </div>
+            </div>
+            <div class="snapshot">
+                <div><span>{{ t("available_copies") }}</span><strong>{{ stats.available }}</strong></div>
+                <div><span>{{ t("borrowed_books") }}</span><strong>{{ stats.borrowed }}</strong></div>
+                <div><span>{{ t("overdue_books") }}</span><strong class="text-danger">{{ stats.overdue }}</strong></div>
+                <div><span>{{ t("unpaid_fines") }}</span><strong class="text-warning">{{ stats.unpaid_fines }}</strong></div>
+                <div><span>{{ t("total_accounts") }}</span><strong>{{ stats.accounts }}</strong></div>
+                <div><span>{{ t("admin_accounts") }}</span><strong>{{ stats.admin_accounts }}</strong></div>
+                <div><span>{{ t("student_accounts") }}</span><strong>{{ stats.student_accounts }}</strong></div>
+                <div><span>{{ t("new_accounts") }}</span><strong>{{ stats.new_accounts }}</strong></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card panel mt-4">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">{{ t("activity") }}</p>
+            <h2>{{ t("recent_borrowing_history") }}</h2>
+        </div>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('borrowing') }}">{{ t("manage") }}</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>{{ t("student") }}</th><th>{{ t("book") }}</th><th>{{ t("borrow_date") }}</th><th>{{ t("due_date") }}</th><th>{{ t("status") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in recent_borrowings %}
+                <tr>
+                    <td>#{{ item.borrow_id }}</td>
+                    <td>{{ item.student_name }}</td>
+                    <td>{{ item.book_title }}</td>
+                    <td>{{ item.borrow_date }}</td>
+                    <td>{{ item.return_date }}</td>
+                    <td><span class="status-badge {{ item.status|lower }}">{{ item.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-secondary">{{ t("no_borrowing_records") }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    <!-- EduBot is included globally in base.html -->
+{% endblock %}
+

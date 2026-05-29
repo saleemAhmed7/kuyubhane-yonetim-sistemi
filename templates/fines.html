@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block page_title %}Fines Management{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">Finance</p>
+        <h2>Fine records</h2>
+    </div>
+    <span>{{ totals.unpaid_count }} unpaid fines</span>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-orange"><i class="fa-solid fa-receipt"></i></div>
+            <span>Unpaid Amount</span>
+            <strong>{{ "%.2f"|format(totals.unpaid_amount) }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-purple"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <span>Unpaid Fines</span>
+            <strong>{{ totals.unpaid_count }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card glass-card">
+            <div class="stat-icon bg-cyan"><i class="fa-solid fa-list-check"></i></div>
+            <span>Total Fine Records</span>
+            <strong>{{ totals.total_count }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card panel">
+    <div class="panel-header flex-wrap gap-3">
+        <form class="search-bar" method="get">
+            <i class="fa-solid fa-filter"></i>
+            <select name="status">
+                <option value="" {% if selected_status == "" %}selected{% endif %}>All fines</option>
+                <option value="Unpaid" {% if selected_status == "Unpaid" %}selected{% endif %}>Unpaid</option>
+                <option value="Paid" {% if selected_status == "Paid" %}selected{% endif %}>Paid</option>
+            </select>
+            <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Student</th><th>Book</th><th>Amount</th><th>Date</th><th>Status</th><th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fine in fines %}
+                <tr>
+                    <td>#{{ fine.fine_id }}</td>
+                    <td>{{ fine.student_name }}<br><small>{{ fine.email }}</small></td>
+                    <td>{{ fine.book_title }}</td>
+                    <td>{{ "%.2f"|format(fine.fine_amount) }}</td>
+                    <td>{{ fine.fine_date }}</td>
+                    <td><span class="status-badge {{ fine.status|lower }}">{{ fine.status }}</span></td>
+                    <td class="text-end">
+                        {% if fine.status == "Unpaid" %}
+                        <form method="post" action="{{ url_for('pay_fine', fine_id=fine.fine_id) }}" data-confirm="Mark this fine as paid?">
+                            <button class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Pay Fine</button>
+                        </form>
+                        {% else %}
+                        <span class="text-secondary">Paid</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-secondary">No fines found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

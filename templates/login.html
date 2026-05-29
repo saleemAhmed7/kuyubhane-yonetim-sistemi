@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{ current_lang }}" dir="{{ page_dir }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ t("login_title") }} - {{ t("app_title") }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="login-body">
+    <main class="login-shell">
+        <section class="login-panel glass-card">
+            <div class="brand login-brand">
+                <span class="brand-icon"><i class="fa-solid fa-book-open-reader"></i></span>
+                <span>
+                    <strong>{{ t("app_title") }}</strong>
+                    <small>{{ t("admin") }}</small>
+                </span>
+            </div>
+            <div class="login-language">
+                {% for code, lang in languages.items() %}
+                <a class="{% if current_lang == code %}active{% endif %}" href="{{ url_for('set_language', lang=code) }}">{{ lang.name }}</a>
+                {% endfor %}
+            </div>
+            <p class="eyebrow">{{ t("secure_access") }}</p>
+            <h1>{{ t("login_title") }}</h1>
+            <p class="text-secondary">{{ t("login_hint") }}</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} glass-alert">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" class="mt-4">
+                <div class="mb-3">
+                    <label class="form-label">{{ t("username") }}</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input class="form-control" name="username" value="admin" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">{{ t("password") }}</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input class="form-control" type="password" name="password" value="admin" required>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> {{ t("login") }}
+                </button>
+            </form>
+            <div class="text-center mt-4">
+                <span class="text-secondary">{{ t("need_student_account") }}</span>
+                <a class="ms-1" href="{{ url_for('register') }}">{{ t("create_one") }}</a>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

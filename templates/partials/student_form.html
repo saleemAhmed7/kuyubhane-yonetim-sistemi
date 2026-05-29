@@ -1,0 +1,29 @@
+<div class="col-md-6">
+    <label class="form-label">First Name</label>
+    <input class="form-control" name="first_name" value="{{ item.first_name if item is defined else '' }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Last Name</label>
+    <input class="form-control" name="last_name" value="{{ item.last_name if item is defined else '' }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Email</label>
+    <input class="form-control" type="email" name="email" value="{{ item.email if item is defined else '' }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Phone</label>
+    <input class="form-control" name="phone" value="{{ item.phone if item is defined else '' }}">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Enrollment Date</label>
+    <input class="form-control" type="date" name="enrollment_date" value="{{ item.enrollment_date if item is defined else today }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Status</label>
+    <select class="form-select" name="status">
+        {% set selected = item.status if item is defined else 'Active' %}
+        <option value="Active" {% if selected == 'Active' %}selected{% endif %}>Active</option>
+        <option value="Inactive" {% if selected == 'Inactive' %}selected{% endif %}>Inactive</option>
+        <option value="Suspended" {% if selected == 'Suspended' %}selected{% endif %}>Suspended</option>
+    </select>
+</div>

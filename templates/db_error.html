@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block page_title %}Database Connection{% endblock %}
+
+{% block content %}
+<div class="glass-card panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">MySQL Error</p>
+            <h2>Database connection needs attention</h2>
+        </div>
+        <span class="badge text-bg-danger">Not connected</span>
+    </div>
+
+    <div class="alert alert-danger glass-alert mb-4">
+        {{ error }}
+    </div>
+
+    <div class="mb-4">
+        <a class="btn btn-primary" href="/" onclick="location.reload(); return false;">
+            <i class="fa-solid fa-arrows-rotate"></i> Retry Connection
+        </a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="snapshot">
+                <div><span>Host</span><strong>{{ config.host }}</strong></div>
+                <div><span>Port</span><strong>{{ config.port }}</strong></div>
+                <div><span>User</span><strong>{{ config.user }}</strong></div>
+                <div><span>Database</span><strong>{{ config.database }}</strong></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card panel h-100">
+                <h2 class="mb-3">Check these</h2>
+                <p class="text-secondary mb-2">1. MySQL Server is running.</p>
+                <p class="text-secondary mb-2">2. MySQL is listening on port <strong>{{ config.port }}</strong>.</p>
+                <p class="text-secondary mb-2">3. Edit the project <strong>.env</strong> file if the password is different.</p>
+                <p class="text-secondary mb-0">4. The app creates missing tables automatically after the login works.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

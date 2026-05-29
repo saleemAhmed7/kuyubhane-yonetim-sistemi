@@ -1,0 +1,20 @@
+<div class="col-md-6">
+    <label class="form-label">Title</label>
+    <input class="form-control" name="title" value="{{ item.title if item is defined else '' }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Author</label>
+    <input class="form-control" name="author" value="{{ item.author if item is defined else '' }}" required>
+</div>
+<div class="col-md-6">
+    <label class="form-label">Category</label>
+    <input class="form-control" name="category" value="{{ item.category if item is defined else '' }}" required>
+</div>
+<div class="col-md-3">
+    <label class="form-label">Total Copies</label>
+    <input class="form-control" type="number" min="0" name="total_copies" value="{{ item.total_copies if item is defined else 1 }}" required>
+</div>
+<div class="col-md-3">
+    <label class="form-label">Available Copies</label>
+    <input class="form-control" type="number" min="0" name="available_copies" value="{{ item.available_copies if item is defined else 1 }}" required>
+</div>

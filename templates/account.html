@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ t("edit_account") }}{% endblock %}
+
+{% block content %}
+<div class="section-intro">
+    <div>
+        <p class="eyebrow">{{ t("account") }}</p>
+        <h2>{{ t("edit_account") }}</h2>
+    </div>
+    <span>{{ user.role }}</span>
+</div>
+
+<form class="glass-card panel account-form" method="post" enctype="multipart/form-data">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {% if user.avatar %}
+            <img src="{{ url_for('static', filename=user.avatar) }}" alt="{{ t('profile_photo') }}">
+            {% else %}
+            <i class="fa-solid fa-user"></i>
+            {% endif %}
+        </div>
+        <div>
+            <p class="eyebrow">{{ t("profile") }}</p>
+            <h2>{{ user.full_name or user.username }}</h2>
+            <span class="text-secondary">{{ user.email or "-" }}</span>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+        <div class="col-md-6">
+            <label class="form-label">{{ t("username") }}</label>
+            <input class="form-control" name="username" value="{{ user.username }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">{{ t("full_name") }}</label>
+            <input class="form-control" name="full_name" value="{{ user.full_name or '' }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">{{ t("email") }}</label>
+            <input class="form-control" type="email" name="email" value="{{ user.email or (student.email if student else '') }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">{{ t("password") }}</label>
+            <input class="form-control" type="password" name="password" placeholder="********">
+        </div>
+        {% if student %}
+        <div class="col-md-6">
+            <label class="form-label">{{ t("phone") }}</label>
+            <input class="form-control" name="phone" value="{{ student.phone or '' }}">
+        </div>
+        {% endif %}
+        <div class="col-md-6">
+            <label class="form-label">{{ t("profile_photo") }}</label>
+            <input class="form-control" type="file" name="avatar" accept="image/*">
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+        <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-floppy-disk"></i> {{ t("save_changes") }}
+        </button>
+        <a class="btn btn-outline-light" href="{{ url_for('catalog') if session.role == 'Student' else url_for('dashboard') }}">
+            {{ t("dashboard") if session.role != 'Student' else t("book_catalog") }}
+        </a>
+    </div>
+</form>
+{% endblock %}
